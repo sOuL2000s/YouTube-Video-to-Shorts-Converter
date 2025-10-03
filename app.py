@@ -17,231 +17,362 @@ if not os.path.exists(TEMP_VIDEO_DIR):
     os.makedirs(TEMP_VIDEO_DIR)
 
 # --- Frontend HTML (embedded directly into Python for a single-file solution) ---
+# This includes the updated, visually enhanced CSS and HTML structure.
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Video to Shorts Converter</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>VideoShaper - YouTube Shorts Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujmOfEX3L5qT4uE5T7zIq4v+n+5i2TzQzF+Bv4M3zB9y3t5R7E/D0FzP4/7zLz6t2Rz6k5vB9t6w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         :root {
-            --primary-color: #6a0572; /* Deep Purple */
-            --secondary-color: #a044ff; /* Lighter Purple */
-            --accent-color: #ffd700; /* Gold */
-            --bg-light: #fdfdff;
-            --bg-dark: #eef2f6;
-            --text-dark: #2c3e50;
-            --text-light: #ffffff;
-            --border-color: #d1d8e0;
-            --shadow-light: rgba(0, 0, 0, 0.05);
-            --shadow-medium: rgba(0, 0, 0, 0.1);
+            --primary-purple: #6c5ce7; /* Soft Purple */
+            --secondary-blue: #0984e3; /* Bright Blue */
+            --accent-yellow: #fdcb6e; /* Warm Yellow */
+            --light-gray: #f5f6fa;
+            --medium-gray: #dfe4ea;
+            --dark-text: #2d3436;
+            --light-text: #ffffff;
+            --success-green: #2ecc71;
+            --error-red: #e74c3c;
+            --warning-orange: #f39c12;
+
+            --header-height: 60px;
+            --footer-height: 50px;
+
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+
+            --shadow-light: rgba(0, 0, 0, 0.08);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --shadow-deep: rgba(0, 0, 0, 0.25);
         }
 
+        /* Base Styles & Typography */
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-light) 100%);
-            color: var(--text-dark);
+            padding: 0;
+            background: linear-gradient(135deg, var(--light-gray) 0%, var(--medium-gray) 100%);
+            color: var(--dark-text);
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        .container {
-            max-width: 700px;
-            width: 100%;
-            background: var(--bg-light);
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px var(--shadow-medium);
-            transition: all 0.3s ease-in-out;
-            border: 1px solid var(--border-color);
+
+        h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--dark-text);
+            margin-top: 0;
+            margin-bottom: 1rem;
         }
-        h1 {
+
+        h1 { font-size: 2.8rem; font-weight: 700; margin-bottom: 2rem; }
+        h2 { font-size: 1.8rem; font-weight: 600; margin-bottom: 1.5rem; }
+        h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        small {
+            display: block;
+            margin-top: 0.5rem;
+            color: #7f8c8d;
+            font-size: 0.85em;
+        }
+
+        /* Layout Structure */
+        .header {
+            background: var(--primary-purple);
+            padding: 1rem 2rem;
+            color: var(--light-text);
+            box-shadow: 0 2px 10px var(--shadow-deep);
+            z-index: 1000;
+            position: sticky;
+            top: 0;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--light-text);
+            margin: 0;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            background: var(--dark-text);
+            color: var(--light-text);
+            padding: 1rem 2rem;
             text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 30px;
-            font-size: 2.2em;
-            font-weight: 600;
-            letter-spacing: -0.5px;
+            font-size: 0.9rem;
+            box-shadow: 0 -2px 10px var(--shadow-deep);
+            margin-top: auto; /* Pushes footer to bottom */
         }
+
+        /* Container Styling */
+        .container {
+            max-width: 800px; /* Wider container */
+            width: 100%;
+            background: var(--light-text);
+            padding: 40px 50px; /* More generous padding */
+            border-radius: var(--border-radius-md);
+            box-shadow: 0 15px 40px var(--shadow-medium);
+            border: 1px solid var(--medium-gray);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .intro-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .intro-section h1 {
+            color: var(--primary-purple);
+            font-size: 3.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .intro-section p {
+            max-width: 600px;
+            margin: 0 auto;
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        /* Form Elements */
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 1.5rem; /* Increased spacing */
         }
+
         label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 0.6rem;
             font-weight: 600;
-            color: var(--text-dark);
-            font-size: 1.05em;
+            color: var(--dark-text);
+            font-size: 1.05rem;
         }
+
         input[type="url"],
         input[type="number"],
         input[type="text"],
         select {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1em;
-            color: var(--text-dark);
-            background-color: var(--bg-light);
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            color: var(--dark-text);
+            background-color: var(--light-gray);
             box-shadow: inset 0 1px 3px var(--shadow-light);
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
             box-sizing: border-box;
         }
+
         input[type="url"]:focus,
         input[type="number"]:focus,
         input[type="text"]:focus,
         select:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 3px rgba(160, 68, 255, 0.2);
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.25); /* Focus ring */
             outline: none;
+            background-color: var(--light-text);
         }
-        small {
-            display: block;
-            margin-top: 8px;
-            color: #7f8c8d;
-            font-size: 0.85em;
-        }
-        button {
+
+        /* Buttons */
+        .btn-primary {
             width: 100%;
-            padding: 15px;
-            background-color: var(--primary-color);
-            color: var(--text-light);
+            padding: 1rem 1.5rem;
+            background: linear-gradient(45deg, var(--primary-purple) 0%, var(--secondary-blue) 100%);
+            color: var(--light-text);
             border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
+            border-radius: var(--border-radius-sm);
+            font-size: 1.15rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 15px rgba(106, 5, 114, 0.2);
-            margin-top: 15px; /* Added spacing for buttons */
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
+            margin-top: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        button:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(160, 68, 255, 0.3);
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--secondary-blue) 0%, var(--primary-purple) 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
         }
-        button:active {
+
+        .btn-primary:active {
             transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(106, 5, 114, 0.2);
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.2);
         }
-        button:disabled {
-            background-color: #cccccc;
+
+        .btn-primary:disabled {
+            background: #cccccc;
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
+            opacity: 0.7;
         }
 
+        /* Advanced Options Toggle */
         .advanced-options-toggle {
             display: flex;
             align-items: center;
-            margin-bottom: 25px;
-            margin-top: -10px;
-            color: var(--primary-color);
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-purple);
             cursor: pointer;
             font-weight: 600;
             font-size: 0.95em;
+            transition: color 0.3s ease;
         }
         .advanced-options-toggle:hover {
-            color: var(--secondary-color);
+            color: var(--secondary-blue);
         }
         .advanced-options-toggle input[type="checkbox"] {
-            margin-right: 8px;
-            min-width: 16px; /* Ensure checkbox is visible */
-            min-height: 16px;
-            accent-color: var(--primary-color); /* Style checkbox */
+            margin-right: 10px;
+            min-width: 18px; /* Larger checkbox */
+            min-height: 18px;
+            accent-color: var(--primary-purple);
             cursor: pointer;
         }
+        .advanced-options-toggle label {
+            margin-bottom: 0;
+            cursor: pointer;
+            font-size: 0.95em; /* Adjust to match checkbox text */
+        }
         .advanced-options-container {
-            border-top: 1px dashed var(--border-color);
-            padding-top: 25px;
-            margin-top: 25px;
-            display: none; /* Hidden by default */
-            transition: all 0.4s ease-out;
-            overflow: hidden; /* For smooth hide/show */
+            border-top: 1px dashed var(--medium-gray);
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            display: grid; /* Use grid for better layout of form groups */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 2 columns on wider screens */
+            gap: 1.5rem; /* Spacing between grid items */
+            transition: all 0.5s ease-out;
+            overflow: hidden;
             max-height: 0;
             opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none; /* Disable interaction when hidden */
         }
         .advanced-options-container.active {
-            display: block; /* Show when active */
-            max-height: 1000px; /* Arbitrary large value for smooth transition */
+            max-height: 1000px; /* Arbitrary large value */
             opacity: 1;
+            transform: translateY(0);
+            pointer-events: all; /* Enable interaction when active */
         }
 
+        /* Status Messages */
         .status-message {
-            margin-top: 30px;
-            padding: 15px 20px;
-            border-radius: 8px;
+            margin-top: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius-sm);
             text-align: center;
             font-weight: 500;
             animation: fadeIn 0.5s ease-out;
+            display: flex; /* For icon alignment */
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         .status-message.loading {
-            background-color: #fff3e0; /* Light orange */
-            color: #e65100; /* Dark orange */
-            border: 1px solid #ffcc80;
+            background-color: #fff8e1;
+            color: var(--warning-orange);
+            border: 1px solid #ffecb3;
         }
         .status-message.success {
-            background-color: #e8f5e9; /* Light green */
-            color: #2e7d32; /* Dark green */
-            border: 1px solid #a5d6a7;
+            background-color: #e8f5e9;
+            color: var(--success-green);
+            border: 1px solid #c8e6c9;
         }
         .status-message.error {
-            background-color: #ffebee; /* Light red */
-            color: #c62828; /* Dark red */
-            border: 1px solid #ef9a9a;
+            background-color: #ffebee;
+            color: var(--error-red);
+            border: 1px solid #ffcdd2;
         }
+
+        /* Download Links */
         .download-links {
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px dashed var(--border-color);
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed var(--medium-gray);
             animation: slideInUp 0.7s ease-out;
         }
         .download-links h3 {
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            font-size: 1.5em;
-            font-weight: 600;
+            color: var(--primary-purple);
+            font-size: 1.6rem;
             text-align: center;
+            margin-bottom: 1.5rem;
         }
         .download-links p {
-            margin-bottom: 15px;
             text-align: center;
+            margin-bottom: 1.5rem;
+            color: #555;
         }
         .download-links ul {
             list-style: none;
             padding: 0;
             display: grid;
-            gap: 10px;
+            gap: 0.8rem;
         }
         .download-links li {
-            background-color: var(--bg-dark);
-            padding: 10px 15px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
+            background-color: var(--light-gray);
+            padding: 0.8rem 1.2rem;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--medium-gray);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 2px 10px var(--shadow-light);
         }
         .download-links li:hover {
             background-color: #e0e7ed;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow-light);
         }
         .download-links a {
-            color: var(--primary-color);
+            color: var(--primary-purple);
             text-decoration: none;
             font-weight: 500;
             flex-grow: 1;
-            padding-right: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .download-links a:hover {
             text-decoration: underline;
-            color: var(--secondary-color);
+            color: var(--secondary-blue);
+        }
+        .download-links a i {
+            font-size: 1.1em;
+            color: var(--secondary-blue);
         }
 
         /* Animations */
@@ -256,141 +387,184 @@ HTML_PAGE = """
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .container {
-                margin: 15px;
-                padding: 25px;
-                box-shadow: 0 5px 20px var(--shadow-light);
+            .header-content, .footer {
+                padding: 1rem 1.5rem;
             }
-            h1 {
-                font-size: 1.8em;
+            .logo {
+                font-size: 1.5rem;
+            }
+            .main-content {
+                padding: 30px 15px;
+            }
+            .container {
+                padding: 30px;
+                border-radius: 10px;
+            }
+            .intro-section h1 {
+                font-size: 2.5rem;
+            }
+            .intro-section p {
+                font-size: 1rem;
+            }
+            h1 { font-size: 2.2rem; margin-bottom: 1.5rem; }
+            h2 { font-size: 1.6rem; margin-bottom: 1.2rem; }
+            h3 { font-size: 1.2rem; margin-bottom: 0.8rem; }
+            .form-group {
+                margin-bottom: 1rem;
             }
             label {
-                font-size: 1em;
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
             }
-            input[type="url"],
-            input[type="number"],
-            input[type="text"],
-            select,
-            button {
-                font-size: 0.95em;
-                padding: 12px;
+            input[type="url"], input[type="number"], input[type="text"], select, .btn-primary {
+                font-size: 0.95rem;
+                padding: 0.7rem 1rem;
+            }
+            .btn-primary {
+                margin-top: 1rem;
+            }
+            .advanced-options-container {
+                grid-template-columns: 1fr; /* Single column on smaller screens */
+                gap: 1rem;
+            }
+            .download-links h3 {
+                font-size: 1.4rem;
+            }
+            .download-links p {
+                font-size: 0.95rem;
             }
         }
 
         @media (max-width: 480px) {
-            body {
-                padding: 10px;
+            .header-content, .footer {
+                padding: 0.8rem 1rem;
+            }
+            .logo {
+                font-size: 1.3rem;
+            }
+            .main-content {
+                padding: 20px 10px;
             }
             .container {
                 padding: 20px;
                 border-radius: 8px;
             }
-            h1 {
-                font-size: 1.5em;
-                margin-bottom: 20px;
+            .intro-section h1 {
+                font-size: 2rem;
             }
-            .form-group {
-                margin-bottom: 20px;
+            .intro-section p {
+                font-size: 0.9rem;
             }
-            label {
-                margin-bottom: 8px;
-            }
-            small {
-                font-size: 0.8em;
+            h1 { font-size: 1.8rem; margin-bottom: 1.2rem; }
+            h2 { font-size: 1.4rem; margin-bottom: 1rem; }
+            h3 { font-size: 1.1rem; margin-bottom: 0.7rem; }
+            .advanced-options-toggle label {
+                font-size: 0.9em;
             }
             .status-message {
-                margin-top: 20px;
-                padding: 12px 15px;
-            }
-            .download-links h3 {
-                font-size: 1.2em;
-            }
-            .download-links p {
+                padding: 0.8rem 1rem;
                 font-size: 0.9em;
             }
             .download-links li {
-                padding: 8px 12px;
+                padding: 0.7rem 1rem;
                 font-size: 0.9em;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>YouTube Video to Shorts Converter</h1>
-        <form id="converterForm">
-            <div class="form-group">
-                <label for="youtubeUrl">YouTube Video URL:</label>
-                <input type="url" id="youtubeUrl" placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ" required>
-            </div>
-            <div class="form-group">
-                <label for="sliceDuration">Slice Duration (seconds):</label>
-                <input type="number" id="sliceDuration" value="60" min="5" max="600" required>
-                <small>Enter the desired length of each short video segment (e.g., 15 for 15-second shorts).</small>
-            </div>
-
-            <div class="advanced-options-toggle">
-                <input type="checkbox" id="toggleAdvancedOptions">
-                <label for="toggleAdvancedOptions" style="margin-bottom: 0; cursor: pointer;">Show Advanced Options</label>
-            </div>
-
-            <div id="advancedOptions" class="advanced-options-container">
-                <h2>Advanced Settings</h2>
-                <div class="form-group">
-                    <label for="downloadStartTime">Download Start Time (HH:MM:SS or seconds):</label>
-                    <input type="text" id="downloadStartTime" placeholder="e.g., 00:01:30 or 90">
-                    <small>Specify where to start downloading the original YouTube video.</small>
-                </div>
-                <div class="form-group">
-                    <label for="downloadEndTime">Download End Time (HH:MM:SS or seconds):</label>
-                    <input type="text" id="downloadEndTime" placeholder="e.g., 00:05:00 or 300">
-                    <small>Specify where to end downloading the original YouTube video.</small>
-                </div>
-                <div class="form-group">
-                    <label for="outputResolution">Output Resolution:</label>
-                    <select id="outputResolution">
-                        <option value="">Original (no change)</option>
-                        <option value="1920x1080">1080p (16:9)</option>
-                        <option value="1080x1920">1080p Portrait (9:16) - Ideal for Shorts</option>
-                        <option value="1280x720">720p (16:9)</option>
-                        <option value="720x1280">720p Portrait (9:16)</option>
-                        <option value="854x480">480p (16:9)</option>
-                        <option value="480x854">480p Portrait (9:16)</option>
-                    </select>
-                    <small>Choose the resolution for your output shorts. Vertical options are for YouTube Shorts.</small>
-                </div>
-                <div class="form-group">
-                    <label for="videoBitrate">Video Bitrate (kbps):</label>
-                    <input type="number" id="videoBitrate" value="" placeholder="e.g., 2000 (for 2Mbps)">
-                    <small>Higher bitrate means better quality but larger file size. Leave empty for default. (e.g., 2000-5000 for 1080p).</small>
-                </div>
-                <div class="form-group">
-                    <label for="audioBitrate">Audio Bitrate (kbps):</label>
-                    <input type="number" id="audioBitrate" value="" placeholder="e.g., 128">
-                    <small>Audio quality. Leave empty for default. (e.g., 128, 192, 256).</small>
-                </div>
-                <div class="form-group">
-                    <label for="videoCodec">Video Codec:</label>
-                    <select id="videoCodec">
-                        <option value="libx264">H.264 (Default, widely compatible)</option>
-                        <option value="libx265">H.265 / HEVC (More efficient, smaller files, less compatible)</option>
-                    </select>
-                    <small>Choose the video compression standard. H.264 is recommended for broad compatibility.</small>
-                </div>
-            </div>
-
-            <button type="submit" id="convertButton">Convert to Shorts</button>
-        </form>
-
-        <div id="status" class="status-message" style="display: none;"></div>
-        <div id="downloadLinks" class="download-links" style="display: none;">
-            <h3>Your Shorts are Ready!</h3>
-            <p>Click on the links below to download your video segments.</p>
-            <ul>
-                <!-- Download links will be inserted here by JavaScript -->
-            </ul>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">VideoShaper</h1>
+            <!-- Navigation could go here for a multi-page site -->
         </div>
-    </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="intro-section">
+                <h1>Transform Your Videos into Engaging Shorts!</h1>
+                <p>Easily convert any YouTube video into short, shareable clips. Download full videos or specific segments, then slice them into custom-duration shorts with advanced control over resolution, bitrate, and codec.</p>
+            </div>
+
+            <form id="converterForm">
+                <div class="form-group">
+                    <label for="youtubeUrl">YouTube Video URL:</label>
+                    <input type="url" id="youtubeUrl" placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ" required>
+                </div>
+                <div class="form-group">
+                    <label for="sliceDuration">Slice Duration (seconds):</label>
+                    <input type="number" id="sliceDuration" value="60" min="5" max="600" required>
+                    <small>Enter the desired length of each short video segment (e.g., 15 for 15-second shorts).</small>
+                </div>
+
+                <div class="advanced-options-toggle">
+                    <input type="checkbox" id="toggleAdvancedOptions">
+                    <label for="toggleAdvancedOptions"><i class="fas fa-sliders-h"></i> Show Advanced Options</label>
+                </div>
+
+                <div id="advancedOptions" class="advanced-options-container">
+                    <h2>Customization Settings</h2>
+                    <div class="form-group">
+                        <label for="downloadStartTime">Download Start Time:</label>
+                        <input type="text" id="downloadStartTime" placeholder="e.g., 00:01:30 or 90">
+                        <small>Optional: Start download from this time (HH:MM:SS or seconds).</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="downloadEndTime">Download End Time:</label>
+                        <input type="text" id="downloadEndTime" placeholder="e.g., 00:05:00 or 300">
+                        <small>Optional: End download at this time (HH:MM:SS or seconds).</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="outputResolution">Output Resolution:</label>
+                        <select id="outputResolution">
+                            <option value="">Original (no change)</option>
+                            <option value="1920x1080">1080p (16:9)</option>
+                            <option value="1080x1920">1080p Portrait (9:16) - Ideal for Shorts</option>
+                            <option value="1280x720">720p (16:9)</option>
+                            <option value="720x1280">700p Portrait (9:16)</option>
+                            <option value="854x480">480p (16:9)</option>
+                            <option value="480x854">480p Portrait (9:16)</option>
+                        </select>
+                        <small>Choose resolution. Portrait options are optimized for Shorts. Note: May involve cropping.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="videoBitrate">Video Bitrate (kbps):</label>
+                        <input type="number" id="videoBitrate" value="" placeholder="e.g., 2000 (for 2Mbps)">
+                        <small>Higher bitrate = better quality, larger file. Leave empty for default (e.g., 2000-5000 for 1080p).</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="audioBitrate">Audio Bitrate (kbps):</label>
+                        <input type="number" id="audioBitrate" value="" placeholder="e.g., 128">
+                        <small>Audio quality. Leave empty for default (e.g., 128, 192, 256).</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="videoCodec">Video Codec:</label>
+                        <select id="videoCodec">
+                            <option value="libx264">H.264 (Default, widely compatible)</option>
+                            <option value="libx265">H.265 / HEVC (More efficient, smaller files, less compatible)</option>
+                        </select>
+                        <small>Choose video compression. H.264 for compatibility, H.265 for efficiency.</small>
+                    </div>
+                </div>
+
+                <button type="submit" id="convertButton" class="btn-primary">Convert to Shorts</button>
+            </form>
+
+            <div id="status" class="status-message" style="display: none;"></div>
+            <div id="downloadLinks" class="download-links" style="display: none;">
+                <h3><i class="fas fa-cloud-download-alt"></i> Your Shorts are Ready!</h3>
+                <p>Click on the links below to download your video segments.</p>
+                <ul>
+                    <!-- Download links will be inserted here by JavaScript -->
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 VideoShaper. All rights reserved.</p>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -432,14 +606,14 @@ HTML_PAGE = """
                 const sliceDuration = parseInt(sliceDurationInput.value, 10);
 
                 if (!youtubeUrl || !sliceDuration || isNaN(sliceDuration) || sliceDuration < 5) {
-                    displayStatus('Please provide a valid YouTube URL and a slice duration of at least 5 seconds.', 'error');
+                    displayStatus('<i class="fas fa-exclamation-circle"></i> Please provide a valid YouTube URL and a slice duration of at least 5 seconds.', 'error');
                     return;
                 }
 
                 convertButton.disabled = true;
-                convertButton.textContent = 'Processing...';
+                convertButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
-                displayStatus('Processing your video... This may take a while depending on video length, server load, and chosen quality settings (re-encoding takes longer).', 'loading');
+                displayStatus('<i class="fas fa-hourglass-half"></i> Processing your video... This may take a while depending on video length, server load, and chosen quality settings (re-encoding takes longer).', 'loading');
                 downloadLinksDiv.style.display = 'none';
                 downloadLinksList.innerHTML = '';
 
@@ -468,38 +642,38 @@ HTML_PAGE = """
 
                     if (response.ok) {
                         if (result.downloadUrls && Array.isArray(result.downloadUrls) && result.downloadUrls.length > 0) {
-                            displayStatus('Video successfully processed! Your shorts are ready.', 'success');
+                            displayStatus('<i class="fas fa-check-circle"></i> Video successfully processed! Your shorts are ready.', 'success');
                             result.downloadUrls.forEach((url, index) => {
                                 const listItem = document.createElement('li');
                                 const link = document.createElement('a');
                                 link.href = url;
-                                link.textContent = `Short Segment ${index + 1} (${sliceDuration}s)`;
+                                link.innerHTML = `<i class="fas fa-film"></i> Short Segment ${index + 1} (${sliceDuration}s)`;
                                 link.download = `youtube_short_segment_${index + 1}.mp4`;
                                 listItem.appendChild(link);
                                 downloadLinksList.appendChild(listItem);
                             });
                             downloadLinksDiv.style.display = 'block';
                         } else if (result.message) {
-                            displayStatus(`Processing finished: ${result.message}`, 'success');
+                            displayStatus(`<i class="fas fa-info-circle"></i> Processing finished: ${result.message}`, 'success');
                         } else {
-                            displayStatus('Processing finished, but no download links were returned.', 'error');
+                            displayStatus('<i class="fas fa-exclamation-circle"></i> Processing finished, but no download links were returned.', 'error');
                         }
                     } else {
-                        displayStatus(`Error: ${result.message || 'Something went wrong on the server.'}`, 'error');
+                        displayStatus(`<i class="fas fa-times-circle"></i> Error: ${result.message || 'Something went wrong on the server.'}`, 'error');
                     }
                 } catch (error) {
                     console.error('Fetch error:', error);
-                    displayStatus(`Network error or server unavailable: ${error.message}. Please ensure your backend server is running at ${API_ENDPOINT}.`, 'error');
+                    displayStatus(`<i class="fas fa-times-circle"></i> Network error or server unavailable: ${error.message}. Please ensure your backend server is running at ${API_ENDPOINT}.`, 'error');
                 } finally {
                     convertButton.disabled = false;
-                    convertButton.textContent = 'Convert to Shorts';
+                    convertButton.innerHTML = 'Convert to Shorts';
                 }
             });
 
             function displayStatus(message, type) {
-                statusDiv.textContent = message;
+                statusDiv.innerHTML = message;
                 statusDiv.className = `status-message ${type}`;
-                statusDiv.style.display = 'block';
+                statusDiv.style.display = 'flex'; // Use flex for icon alignment
                 if (type === 'loading' || type === 'error') {
                     downloadLinksDiv.style.display = 'none';
                     downloadLinksList.innerHTML = '';
@@ -555,7 +729,7 @@ def convert_video():
     output_resolution = data.get('output_resolution')
     video_bitrate_str = data.get('video_bitrate')
     audio_bitrate_str = data.get('audio_bitrate')
-    video_codec = data.get('video_codec')
+    video_codec = data.get('video_codec', 'libx264') # Default to libx264 if not specified
 
     if not youtube_url or not slice_duration_str:
         return jsonify({"message": "Missing YouTube URL or slice duration."}), 400
@@ -571,7 +745,7 @@ def convert_video():
     download_end_seconds = parse_time_to_seconds(download_end_time_str)
 
     # Validate custom resolutions format (e.g., "1920x1080")
-    if output_resolution and 'x' not in output_resolution and output_resolution not in ['original']:
+    if output_resolution and 'x' not in output_resolution and output_resolution not in ['original', '']:
         return jsonify({"message": "Invalid output resolution format. Use WIDTHxHEIGHT (e.g., 1920x1080)."}), 400
 
     # Validate bitrates
@@ -659,7 +833,7 @@ def convert_video():
                 '-i', original_video_path,
                 '-ss', str(start_time),
                 '-t', str(current_slice_duration),
-                '-avoid_negative_ts', 'make_zero', # Handle negative timestamps gracefully
+                '-avoid_negative_ts', 'make_zero',
             ]
 
             if re_encode:
@@ -674,7 +848,7 @@ def convert_video():
                     slice_command.extend(['-b:a', f"{audio_bitrate}k"])
 
                 # Output Resolution and Aspect Ratio
-                if output_resolution and output_resolution != 'Original (no change)':
+                if output_resolution and output_resolution not in ['original', '']:
                     width, height = map(int, output_resolution.split('x'))
                     # This filter scales to fit *within* the target dimensions while maintaining aspect ratio,
                     # then crops to exactly the target dimensions (center crop).
@@ -723,10 +897,6 @@ def download_file(session_id, filename):
     file_path = os.path.join(TEMP_VIDEO_DIR, session_id, filename)
     if not os.path.exists(file_path):
         return jsonify({"message": "File not found or has been removed."}), 404
-
-    # TODO: Implement a more robust cleanup mechanism for session directories
-    # A simple approach could be to delete the parent session_id directory after a certain time
-    # or after all files in it have been accessed. For this example, files persist.
 
     return send_from_directory(
         directory=os.path.join(TEMP_VIDEO_DIR, session_id),
