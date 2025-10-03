@@ -1,0 +1,1 @@
+write an html code for youtube  video to short converter, which will ask for youtube video url and will download it and then slice it in "user chosen" seconds parts.
