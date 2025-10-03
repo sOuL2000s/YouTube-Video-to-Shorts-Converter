@@ -6,7 +6,9 @@ from flask import Flask, request, jsonify, render_template_string, send_from_dir
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app) # Enable CORS for all routes by default
+# Enable CORS for all routes. This is important for local development if frontend is on a different port,
+# and generally good practice if you intend to have other frontends consume this API.
+CORS(app)
 
 # --- Configuration ---
 TEMP_VIDEO_DIR = 'temp_videos'
@@ -17,7 +19,8 @@ if not os.path.exists(TEMP_VIDEO_DIR):
     os.makedirs(TEMP_VIDEO_DIR)
 
 # --- Frontend HTML (embedded directly into Python for a single-file solution) ---
-# This includes the updated, visually enhanced CSS and HTML structure.
+# IMPORTANT: The JavaScript API_ENDPOINT and download_urls are now relative,
+# which allows the browser to automatically use the correct domain on Render.
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -586,8 +589,8 @@ HTML_PAGE = """
             const audioBitrateInput = document.getElementById('audioBitrate');
             const videoCodecSelect = document.getElementById('videoCodec');
 
-
-            const API_ENDPOINT = 'http://localhost:5000/convert';
+            // IMPORTANT: API_ENDPOINT is now relative, so it will work on Render's domain.
+            const API_ENDPOINT = '/convert';
 
             // Toggle advanced options visibility
             toggleAdvancedOptions.addEventListener('change', () => {
@@ -646,7 +649,7 @@ HTML_PAGE = """
                             result.downloadUrls.forEach((url, index) => {
                                 const listItem = document.createElement('li');
                                 const link = document.createElement('a');
-                                link.href = url;
+                                link.href = url; // These URLs are now relative from the backend
                                 link.innerHTML = `<i class="fas fa-film"></i> Short Segment ${index + 1} (${sliceDuration}s)`;
                                 link.download = `youtube_short_segment_${index + 1}.mp4`;
                                 listItem.appendChild(link);
@@ -663,7 +666,7 @@ HTML_PAGE = """
                     }
                 } catch (error) {
                     console.error('Fetch error:', error);
-                    displayStatus(`<i class="fas fa-times-circle"></i> Network error or server unavailable: ${error.message}. Please ensure your backend server is running at ${API_ENDPOINT}.`, 'error');
+                    displayStatus(`<i class="fas fa-times-circle"></i> Network error or server unavailable: ${error.message}. Please ensure your backend service is running.`, 'error');
                 } finally {
                     convertButton.disabled = false;
                     convertButton.innerHTML = 'Convert to Shorts';
@@ -852,8 +855,6 @@ def convert_video():
                     width, height = map(int, output_resolution.split('x'))
                     # This filter scales to fit *within* the target dimensions while maintaining aspect ratio,
                     # then crops to exactly the target dimensions (center crop).
-                    # This is typical for converting wide video to vertical shorts without black bars.
-                    # Adjust if a different scaling/cropping strategy is desired.
                     filter_complex = f"scale='min({width},iw)':min'({height},ih)':force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2"
                     slice_command.extend(['-vf', filter_complex])
                 else: # Default video quality if re-encoding without explicit settings
@@ -868,7 +869,8 @@ def convert_video():
             app.logger.info(f"Slicing command: {' '.join(slice_command)}")
             subprocess.run(slice_command, check=True, capture_output=True, text=True, timeout=600) # 10 minutes timeout for slicing
             app.logger.info(f"Sliced: {output_slice_path}")
-            download_urls.append(f"http://localhost:5000/download/{session_id}/{output_slice_filename}")
+            # IMPORTANT: Return relative URLs so they work on the deployed domain
+            download_urls.append(f"/download/{session_id}/{output_slice_filename}")
 
         return jsonify({"message": "Video processed successfully.", "downloadUrls": download_urls}), 200
 
@@ -905,4 +907,5 @@ def download_file(session_id, filename):
     )
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # Only run in debug mode locally. Render will use Gunicorn.
+    app.run(debug=True, port=os.environ.get('PORT', 5000))
